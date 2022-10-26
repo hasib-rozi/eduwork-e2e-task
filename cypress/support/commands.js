@@ -23,3 +23,25 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+Cypress.Commands.overwrite('type', (originalFn, element, text, options) => {
+    if (options && options.sensitive) {
+      // turn off original log
+      options.log = false
+      // create our own log with masked message
+      Cypress.log({
+        $el: element,
+        name: 'type',
+        message: '*'.repeat(text.length),
+      })
+    }
+  
+    return originalFn(element, text, options)
+  })
+
+Cypress.Commands.add('login', (username, password) => {
+    cy.clearCookies()
+    cy.clearLocalStorage()
+    cy.get('#user_login').type('username')
+    cy.get('#user_password').type('password', { sensitive: true })
+    cy.get('input[name="submit"]').click()
+})
